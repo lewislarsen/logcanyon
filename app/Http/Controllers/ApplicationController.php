@@ -40,8 +40,32 @@ class ApplicationController extends Controller
     {
         Gate::authorize('view', $application);
 
+        $logs = $application->logs()
+            ->latest()
+            ->limit(800)
+            ->get();
+
+        // format the logs with tailwindcss classes
+        $logs = $logs->map(function ($log) {
+            $log->class = match ($log->level) {
+                'emergency' => 'bg-red-100 text-red-800',
+                'alert' => 'bg-red-200 text-red-800',
+                'critical' => 'bg-red-300 text-red-800',
+                'error' => 'bg-red-400 text-red-800',
+                'warning' => 'bg-yellow-200 text-yellow-800',
+                'notice' => 'bg-blue-200 text-blue-800',
+                'info' => 'bg-blue-300 text-blue-800',
+                default => 'bg-gray-200 text-gray-800',
+            };
+            return $log;
+        });
+
+
+
+
         return view('applications.show', [
             'application' => $application,
+            'logs' => $logs,
         ]);
     }
 
